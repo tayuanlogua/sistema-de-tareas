@@ -1,39 +1,85 @@
+"use strict";
 import { Request, Response } from "express";
-import User from "../models/user.model";
-import bcryptjs from "bcryptjs";
-import { createAccessToken } from "../libs/jwt";
+import User from "../models/user.model.js";
+import bcrypt from "bcryptjs";
+import { createAccessToken } from "../libs/jwt.js";
 import jwt from "jsonwebtoken";
-import { TOKEN_SECRET } from "../config";
+import { TOKEN_SECRET } from "../config.js";
 
 /**
- * Interface for defining the structure of a user.
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - username
+ *         - email
+ *         - password
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: The auto-generated id of the user
+ *         username:
+ *           type: string
+ *           description: The username of the user
+ *         email:
+ *           type: string
+ *           description: The email of the user
+ *         password:
+ *           type: string
+ *           description: The password of the user
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: The creation date of the user
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: The last update date of the user
+ *       example:
+ *         id: d5fE_asz
+ *         username: johndoe
+ *         email: johndoe@example.com
+ *         password: secret
+ *         createdAt: 2023-06-01T00:00:00.000Z
+ *         updatedAt: 2023-06-01T00:00:00.000Z
  */
-interface IUser {
-  _id: string;
-  username: string;
-  email: string;
-  password: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 /**
- * Controller function to handle user registration.
- * @param {Request} req - The Express request object.
- * @param {Response} res - The Express response object.
- * @returns {Response} The response containing user data or error message.
+ * @swagger
+ * tags:
+ *   name: Auth
+ *   description: The authentication managing API
  */
-export const register = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+
+/**
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     summary: Registers a new user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       201:
+ *         description: The user was successfully registered
+ *       400:
+ *         description: The email is already in use
+ *       500:
+ *         description: Some server error
+ */
+export const register = async (req: Request, res: Response) => {
   const { username, email, password } = req.body;
-
   try {
     const userFound = await User.findOne({ email });
     if (userFound) return res.status(400).json(["The email is already in use"]);
 
-    const passwordHash = await bcryptjs.hash(password, 10);
+    const passwordHash = await bcrypt.hash(password, 10);
 
     const newUser = new User({
       username,
@@ -46,7 +92,7 @@ export const register = async (
     const token = await createAccessToken({ id: userSaved._id });
     res.cookie("token", token);
 
-    return res.json({
+    res.status(201).json({
       id: userSaved._id,
       username: userSaved.username,
       email: userSaved.email,
@@ -54,31 +100,44 @@ export const register = async (
       updatedAt: userSaved.updatedAt,
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
 /**
- * Controller function to handle user login.
- * @param {Request} req - The Express request object.
- * @param {Response} res - The Express response object.
- * @returns {Response} The response containing user data or error message.
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Logs in a user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: The user was successfully logged in
+ *       400:
+ *         description: User not found or incorrect password
+ *       500:
+ *         description: Some server error
  */
-export const login = async (req: Request, res: Response): Promise<Response> => {
+export const login = async (req: Request, res: Response) => {
   const { password, email } = req.body;
-
   try {
     const userFound = await User.findOne({ email });
     if (!userFound) return res.status(400).json({ message: "User not found" });
 
-    const isMatch = await bcryptjs.compare(password, userFound.password);
+    const isMatch = await bcrypt.compare(password, userFound.password);
     if (!isMatch)
       return res.status(400).json({ message: "Incorrect password" });
 
     const token = await createAccessToken({ id: userFound._id });
     res.cookie("token", token);
 
-    return res.json({
+    res.json({
       id: userFound._id,
       username: userFound.username,
       email: userFound.email,
@@ -86,79 +145,97 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
       updatedAt: userFound.updatedAt,
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
 /**
- * Controller function to handle user logout.
- * @param {Request} req - The Express request object.
- * @param {Response} res - The Express response object.
- * @returns {Response} The response indicating successful logout or error message.
+ * @swagger
+ * /auth/logout:
+ *   post:
+ *     summary: Logs out a user
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: The user was successfully logged out
+ *       500:
+ *         description: Some server error
  */
-export const logout = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const logout = (req: Request, res: Response) => {
   try {
-    res.clearCookie("token");
-    return res.sendStatus(204);
+    res.cookie("token", "", {
+      expires: new Date(0),
+    });
+    return res.sendStatus(200);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
 /**
- * Controller function to fetch user profile.
- * @param {Request} req - The Express request object.
- * @param {Response} res - The Express response object.
- * @returns {Response} The response containing user profile data or error message.
+ * @swagger
+ * /auth/profile:
+ *   get:
+ *     summary: Gets the profile of the authenticated user
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: The user profile was successfully retrieved
+ *       400:
+ *         description: User not found
+ *       500:
+ *         description: Some server error
  */
-export const profile = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const profile = async (req: Request, res: Response) => {
   try {
-    const userFound = await User.findById(req.user?.id);
+    const userFound = await User.findById(req.user.id);
     if (!userFound) return res.status(400).json({ message: "User not found" });
 
     return res.json({
-      id: userFound._id,
+      id: userFound.id,
       username: userFound.username,
       email: userFound.email,
       createdAt: userFound.createdAt,
       updatedAt: userFound.updatedAt,
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
 /**
- * Controller function to verify user token.
- * @param {Request} req - The Express request object.
- * @param {Response} res - The Express response object.
- * @returns {Response} The response indicating successful token verification or error message.
+ * @swagger
+ * /auth/verifyToken:
+ *   post:
+ *     summary: Verifies the access token
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: The token was successfully verified
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Some server error
  */
-export const verifyToken = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const verifyToken = async (req: Request, res: Response) => {
   const { token } = req.cookies;
-
   if (!token) return res.status(401).json({ message: "Unauthorized" });
 
-  jwt.verify(token, TOKEN_SECRET, async (err: any, user: any) => {
-    if (err)
-      return res.status(401).json({ message: "Unauthorized", error: err });
-    const userFound = await User.findById(user?.id);
-    if (!userFound) return;
-    return res.status(401).json({ message: "Unauthorized" });
+  jwt.verify(
+    token,
+    TOKEN_SECRET,
+    async (err: jwt.VerifyErrors | null, user: any) => {
+      if (err) return res.status(401).json({ message: "Unauthorized" });
+      const userFound = await User.findById(user.id);
+      if (!userFound) return res.status(401).json({ message: "Unauthorized" });
 
-    return res.json({
-      id: userFound._id,
-      username: userFound.username,
-      email: userFound.email,
-    });
-  });
+      return res.json({
+        id: userFound._id,
+        username: userFound.username,
+        email: userFound.email,
+      });
+    }
+  );
 };

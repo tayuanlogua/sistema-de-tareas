@@ -1,22 +1,18 @@
-import { Request, Response, NextFunction } from "express";
-import * as yup from "yup"; // Importar yup
-import { Schema } from "yup";
-
 /**
- * Middleware to validar el cuerpo de la solicitud según un esquema.
- * @param {Schema<any>} schema - El esquema Yup para validar el cuerpo de la solicitud.
- * @returns {import("express").RequestHandler} Función middleware de Express.
+ * Middleware to validate the request body against a schema.
+ * @param {Schema<any>} schema - The Yup schema to validate the request body against.
+ * @returns {import("express").RequestHandler} Express middleware function.
  */
 export const validateSchema =
   (schema: Schema<any>) =>
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      // Validar el cuerpo de la solicitud según el esquema proporcionado
+      // Validate the request body against the provided schema
       schema.validateSync(req.body, { abortEarly: false });
-      // Si la validación es exitosa, pasar al siguiente middleware
+      // If validation is successful, proceed to the next middleware
       next();
     } catch (error: any) {
-      // Si la validación falla, enviar una respuesta de error con los mensajes de error
+      // If validation fails, send an error response with the error messages
       return res
         .status(400)
         .json(error.errors.map((error: yup.ValidationError) => error.message));

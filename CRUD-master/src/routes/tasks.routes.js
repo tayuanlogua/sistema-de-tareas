@@ -1,20 +1,20 @@
 const express = require("express");
 const swaggerUi = require("swagger-ui-express");
-const swaggerDocument = require("./swagger.json"); // Ruta al archivo de documentación OpenAPI
-const router = require("./tu_router");
+const swaggerDocument = require("./swagger.json"); // Path to your OpenAPI documentation file
+const router = require("./your_router");
 
 const app = express();
 
-// Middleware para servir la documentación Swagger
+// Middleware to serve Swagger documentation
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Agregamos el enrutador de tu aplicación
+// Add your application router
 app.use(router);
 
-// Puerto en el que se ejecutará el servidor
+// Port on which the server will run
 const PORT = process.env.PORT || 3000;
 
-// Iniciar el servidor
+// Start the server
 app.listen(PORT, () => {
-  console.log(`Servidor en ejecución en http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });

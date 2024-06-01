@@ -1,16 +1,48 @@
-const express = require("express");
-const swaggerUi = require("swagger-ui-express");
-const swaggerDocument = require("./swagger.json"); // Ruta al archivo de documentación OpenAPI
+"use strict";
+import express from "express";
+import morgan from "morgan";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from "./swagger.json"; // Path to the OpenAPI documentation file
+import authRoutes from "./routes/auth.routes.js";
+import tasksRoutes from "./routes/tasks.routes.js";
 
 const app = express();
 
-// Middleware para servir la documentación Swagger
+// Cookie security configuration
+app.use(
+  cookieParser({
+    sameSite: "strict",
+    httpOnly: true,
+  })
+);
+
+// CORS configuration
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
+// Request logging middleware
+app.use(morgan("dev"));
+
+// Middleware for serving Swagger documentation
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Puerto en el que se ejecutará el servidor
-const PORT = process.env.PORT || 3000;
+// Middleware for parsing HTTP request bodies
+app.use(express.json());
 
-// Iniciar el servidor
-app.listen(PORT, () => {
-  console.log(`Servidor en ejecución en http://localhost:${PORT}`);
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send("Internal Server Error");
 });
+
+// Route consumption
+app.use("/api", authRoutes);
+app.use("/api", tasksRoutes);
+
+export default app;

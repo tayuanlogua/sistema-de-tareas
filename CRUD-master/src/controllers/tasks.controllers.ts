@@ -9,9 +9,80 @@ declare module "express-serve-static-core" {
 }
 
 /**
- * Get all tasks for the authenticated user.
- * @param {Request} req - Request object.
- * @param {Response} res - Response object.
+ * @swagger
+ * components:
+ *   schemas:
+ *     Task:
+ *       type: object
+ *       required:
+ *         - title
+ *         - description
+ *         - dueDate
+ *         - status
+ *         - user
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: The auto-generated id of the task
+ *         title:
+ *           type: string
+ *           description: The title of the task
+ *         description:
+ *           type: string
+ *           description: The description of the task
+ *         dueDate:
+ *           type: string
+ *           format: date-time
+ *           description: The due date of the task
+ *         status:
+ *           type: string
+ *           description: The status of the task
+ *         user:
+ *           type: string
+ *           description: The user id associated with the task
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: The creation date of the task
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: The last update date of the task
+ *       example:
+ *         id: d5fE_asz
+ *         title: "Buy groceries"
+ *         description: "Milk, Bread, Cheese"
+ *         dueDate: "2023-06-01T00:00:00.000Z"
+ *         status: "pending"
+ *         user: "user_id"
+ *         createdAt: "2023-06-01T00:00:00.000Z"
+ *         updatedAt: "2023-06-01T00:00:00.000Z"
+ */
+
+/**
+ * @swagger
+ * tags:
+ *   name: Tasks
+ *   description: The tasks managing API
+ */
+
+/**
+ * @swagger
+ * /tasks:
+ *   get:
+ *     summary: Retrieves all tasks of the authenticated user
+ *     tags: [Tasks]
+ *     responses:
+ *       200:
+ *         description: A list of tasks
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Task'
+ *       500:
+ *         description: Something went wrong
  */
 export const getTasks = async (req: Request, res: Response) => {
   try {
@@ -25,9 +96,22 @@ export const getTasks = async (req: Request, res: Response) => {
 };
 
 /**
- * Create a new task for the authenticated user.
- * @param {Request} req - Request object.
- * @param {Response} res - Response object.
+ * @swagger
+ * /tasks:
+ *   post:
+ *     summary: Creates a new task for the authenticated user
+ *     tags: [Tasks]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Task'
+ *     responses:
+ *       201:
+ *         description: The task was successfully created
+ *       500:
+ *         description: Something went wrong
  */
 export const createTask = async (req: Request, res: Response) => {
   try {
@@ -40,16 +124,34 @@ export const createTask = async (req: Request, res: Response) => {
       user: req.user?.id,
     });
     const savedTask = await newTask.save();
-    res.json(savedTask);
+    res.status(201).json(savedTask);
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
 
 /**
- * Get a specific task by its ID.
- * @param {Request} req - Request object.
- * @param {Response} res - Response object.
+ * @swagger
+ * /tasks/{id}:
+ *   get:
+ *     summary: Retrieves a specific task by its ID
+ *     tags: [Tasks]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The task ID
+ *     responses:
+ *       200:
+ *         description: The task was successfully retrieved
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Task'
+ *       404:
+ *         description: Task not found
  */
 export const getTask = async (req: Request, res: Response) => {
   try {
@@ -62,9 +164,23 @@ export const getTask = async (req: Request, res: Response) => {
 };
 
 /**
- * Delete a specific task by its ID.
- * @param {Request} req - Request object.
- * @param {Response} res - Response object.
+ * @swagger
+ * /tasks/{id}:
+ *   delete:
+ *     summary: Deletes a specific task by its ID
+ *     tags: [Tasks]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The task ID
+ *     responses:
+ *       204:
+ *         description: The task was successfully deleted
+ *       404:
+ *         description: Task not found
  */
 export const deleteTask = async (req: Request, res: Response) => {
   try {
@@ -77,9 +193,33 @@ export const deleteTask = async (req: Request, res: Response) => {
 };
 
 /**
- * Update a specific task by its ID.
- * @param {Request} req - Request object.
- * @param {Response} res - Response object.
+ * @swagger
+ * /tasks/{id}:
+ *   put:
+ *     summary: Updates a specific task by its ID
+ *     tags: [Tasks]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The task ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Task'
+ *     responses:
+ *       200:
+ *         description: The task was successfully updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Task'
+ *       404:
+ *         description: Task not found
  */
 export const updateTask = async (req: Request, res: Response) => {
   try {

@@ -1,8 +1,6 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createAccessToken = void 0;
-const jsonwebtoken_1 = require("jsonwebtoken");
-const config_js_1 = require("../config.js");
+const jwt = require("jsonwebtoken");
+const { TOKEN_SECRET } = require("../config");
 
 /**
  * Creates a new access token.
@@ -11,9 +9,9 @@ const config_js_1 = require("../config.js");
  */
 function createAccessToken(payload) {
   return new Promise((resolve, reject) => {
-    jsonwebtoken_1.default.sign(
+    jwt.sign(
       payload,
-      config_js_1.TOKEN_SECRET,
+      TOKEN_SECRET,
       {
         expiresIn: "1d",
       },
@@ -24,4 +22,5 @@ function createAccessToken(payload) {
     );
   });
 }
-exports.createAccessToken = createAccessToken;
+
+module.exports = { createAccessToken };
