@@ -1,32 +1,32 @@
-import app from "./app.js";
-import { connectDB } from "./db.js";
+import app from "./app";
+import { connectDB } from "./db";
 
-// Puerto del servidor
+// Server port
 const PORT = process.env.PORT || 3000;
 
-// Iniciando el servidor y conectando a la base de datos
+// Starting the server and connecting to the database
 const startServer = async () => {
   try {
-    // Iniciando la aplicación Express
+    // Starting the Express application
     const server = app.listen(PORT, () => {
-      console.log(`Servidor en ejecución en http://localhost:${PORT}`);
+      console.log(`Server running at http://localhost:${PORT}`);
     });
 
-    // Conectando a la base de datos
+    // Connecting to the database
     await connectDB();
 
-    // Manejo de cierre del servidor
+    // Server close handling
     process.on("SIGINT", () => {
       server.close(() => {
-        console.log("Servidor cerrado correctamente");
+        console.log("Server closed successfully");
         process.exit(0);
       });
     });
   } catch (error) {
-    console.error("Error al iniciar el servidor:", error);
-    process.exit(1); // Salir con código de error
+    console.error("Error starting the server:", error);
+    process.exit(1); // Exit with error code
   }
 };
 
-// Iniciar el servidor
+// Start the server
 startServer();

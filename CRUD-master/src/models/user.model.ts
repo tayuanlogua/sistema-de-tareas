@@ -1,7 +1,24 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
-// Definición del esquema de usuario
-const userSchema = new mongoose.Schema(
+/**
+ * Interface representing a user document.
+ * @interface User
+ * @extends Document
+ */
+interface User extends Document {
+  username: string;
+  email: string;
+  password: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Mongoose schema for user data.
+ * @const userSchema
+ * @type {Schema<User>}
+ */
+const userSchema: Schema<User> = new Schema(
   {
     username: {
       type: String,
@@ -12,7 +29,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      unique: true, // Garantiza que cada correo electrónico sea único en la base de datos
+      unique: true,
     },
     password: {
       type: String,
@@ -20,11 +37,15 @@ const userSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, // Agrega campos de createdAt y updatedAt automáticamente
+    timestamps: true,
   }
 );
 
-// Compilación del modelo de usuario
-const User = mongoose.model("User", userSchema);
+/**
+ * Mongoose model for the User schema.
+ * @const User
+ * @type {mongoose.Model<User>}
+ */
+const User = mongoose.model<User>("User", userSchema);
 
 export default User;

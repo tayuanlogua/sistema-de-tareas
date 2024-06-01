@@ -1,16 +1,18 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateSchema = void 0;
-const validateSchema = (schema) => (req, res, next) => {
-    try {
-        // Intenta analizar el cuerpo de la solicitud según el esquema proporcionado
-        schema.parse(req.body);
-        // Si la validación es exitosa, pasa al siguiente middleware
-        next();
-    }
-    catch (error) {
-        // Si la validación falla, envía una respuesta de error con los mensajes de error
-        return res.status(400).json(error.errors.map((error) => error.message));
-    }
+import { Schema } from "yup"; // Assuming you're using Yup for schema validation
+
+/**
+ * Middleware to validate the request body against a schema.
+ * @param {Schema<any>} schema - The Yup schema to validate the request body against.
+ * @returns {import("express").RequestHandler} Express middleware function.
+ */
+export const validateSchema = (schema) => (req, res, next) => {
+  try {
+    // Try to parse the request body according to the provided schema
+    schema.parse(req.body);
+    // If validation is successful, proceed to the next middleware
+    next();
+  } catch (error) {
+    // If validation fails, send an error response with the error messages
+    return res.status(400).json(error.errors.map((error) => error.message));
+  }
 };
-exports.validateSchema = validateSchema;

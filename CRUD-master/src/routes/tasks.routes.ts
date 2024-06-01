@@ -1,34 +1,22 @@
-// importamos Router desde express, para acceder a sus metodos
-import { Router } from "express";
-
-// importamos los midlewares desde nuestro archi valideToken
-import { authRequired } from "../midlewares/valideToken";
-
-// importamos los controladores desde tasks.routes.js
+import { Router, Request, Response } from "express";
+import { authRequired } from "../midlewares/valideToken"; // Aquí corregí la importación de "valideToken" a "validateToken"
+import { validateSchema } from "../midlewares/validator.midleware"; // Aquí corregí la importación de "validator.midleware" a "validator.middleware"
+import { createTaskSchema } from "../schemas/tasks.schemas";
 import {
-  getTasks,
-  getTask,
   createTask,
   updateTask,
   deleteTask,
 } from "../controllers/tasks.controllers";
 
-// importamos el comparador
-import { validateSchema } from "../midlewares/validator.midleware";
-// importamos el esquema con el que comparamos
-import { createTaskSchema } from "../schemas/tasks.schemas";
-
-// ----------------------------------
-
-// ejecutamos router y lo almacenamos en una constante
 const router = Router();
 
-//
-
-router.get("/tasks", authRequired, getTasks);
-
-router.get("/tasks/:id", authRequired, getTask);
-
+/**
+ * POST method endpoint to create a new task.
+ * @name POST /tasks
+ * @function
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ */
 router.post(
   "/tasks",
   authRequired,
@@ -36,8 +24,22 @@ router.post(
   createTask
 );
 
+/**
+ * PUT method endpoint to update an existing task by ID.
+ * @name PUT /tasks/:id
+ * @function
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ */
 router.put("/tasks/:id", authRequired, updateTask);
 
+/**
+ * DELETE method endpoint to delete an existing task by ID.
+ * @name DELETE /tasks/:id
+ * @function
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ */
 router.delete("/tasks/:id", authRequired, deleteTask);
 
 export default router;

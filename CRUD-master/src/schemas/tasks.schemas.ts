@@ -1,11 +1,14 @@
 import { z } from "zod";
 
+/**
+ * Schema for creating a new task.
+ */
 export const createTaskSchema = z.object({
   title: z.string({
-    required_error: "El título es obligatorio",
+    required_error: "Title is required",
   }),
   description: z.string({
-    required_error: "La descripción debe ser un texto",
+    required_error: "Description must be a text",
   }),
   date: z.string().datetime().optional(),
 });

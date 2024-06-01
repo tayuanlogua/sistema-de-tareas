@@ -1,22 +1,22 @@
+````markdown
+# CRUD Project with TypeScript 🛠️
 
+This is a basic project implementing CRUD (Create, Read, Update, Delete) operations using TypeScript for the backend.
 
-# Proyecto CRUD con TypeScript
+## Initial Setup 🚀
 
-Este es un proyecto básico que implementa operaciones CRUD (Crear, Leer, Actualizar, Eliminar) utilizando TypeScript para el backend.
+### Installing TypeScript
 
-## Configuración inicial
-
-### Instalación de TypeScript
-
-Asegúrate de tener TypeScript instalado de manera global en tu sistema:
+Make sure you have TypeScript installed globally on your system:
 
 ```bash
 npm install -g typescript
 ```
+````
 
-### Creación de `tsconfig.json`
+### Creating `tsconfig.json`
 
-Crea un archivo `tsconfig.json` en la raíz del proyecto con la siguiente configuración:
+Create a `tsconfig.json` file in the root of the project with the following configuration:
 
 ```json
 {
@@ -32,17 +32,29 @@ Crea un archivo `tsconfig.json` en la raíz del proyecto con la siguiente config
 }
 ```
 
-### Instalación de tipos para las bibliotecas
+### Installing Types for Libraries
 
-Instala los archivos de definición de tipos para las bibliotecas utilizadas en el proyecto:
+Install type definition files for the libraries used in the project:
 
 ```bash
 npm install --save-dev @types/express @types/morgan @types/cookie-parser @types/cors @types/bcryptjs @types/jsonwebtoken @types/node
 ```
 
-## Estructura del proyecto
+### Installing Nodemon and ts-node
 
-El proyecto sigue la siguiente estructura:
+Nodemon is a tool that helps develop node.js based applications by automatically restarting the application when file changes are detected.
+
+Ts-node is a TypeScript execution engine that compiles TypeScript code on-the-fly before running it.
+
+Install these development tools globally or locally based on your preferences:
+
+```bash
+npm install -g nodemon ts-node
+```
+
+## Project Structure 📁
+
+The project follows the following structure:
 
 ```
 - src/
@@ -64,30 +76,45 @@ El proyecto sigue la siguiente estructura:
 - README.md
 ```
 
-## Ejecución del proyecto
+## Running the Project ▶️
 
-### Compilación
+### Compilation
 
-Para compilar el proyecto, utiliza el comando:
+To compile the project, use the following command:
 
 ```bash
 tsc
 ```
 
-Esto compilará el código TypeScript en JavaScript y generará los archivos correspondientes en el directorio `dist`.
+This will compile the TypeScript code into JavaScript and generate the corresponding files in the `dist` directory.
 
-### Ejecución
+### Running with Nodemon
 
-Para ejecutar el proyecto, utiliza el siguiente comando:
+To run the project with Nodemon, use the following command:
 
 ```bash
-node dist/index.js
+nodemon dist/index.js
 ```
 
-Esto iniciará el servidor y el proyecto estará listo para recibir peticiones.
+This will start the server, and the project will be ready to receive requests. Nodemon will automatically restart the application when changes to files are detected.
 
-## Contribución
+### Running with Ts-node
 
-Siéntete libre de contribuir al proyecto. Puedes abrir una nueva solicitud de extracción (pull request) para sugerir mejoras, corregir errores o agregar nuevas características.
+To run the project with Ts-node, use the following command:
 
-¡Gracias por tu interés en este proyecto!
+```bash
+ts-node src/index.ts
+```
+
+This will start the server using Ts-node, which compiles and executes the TypeScript code on-the-fly.
+
+## Contribution 🤝
+
+Feel free to contribute to the project. You can open a new pull request to suggest improvements, fix bugs, or add new features.
+
+Thank you for your interest in this project! 🙏
+
+```
+
+This README provides detailed information about the initial setup, project structure, how to compile and run the project, as well as how to contribute to it. Additionally, it adds details about additional dependencies and how to use tools like Nodemon and Ts-node to facilitate development.
+```

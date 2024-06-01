@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -7,15 +7,19 @@ import taskRoutes from "./routes/tasks.routes";
 
 const app = express();
 
+// Cookie security configuration
+app.use(cookieParser());
+
 // Configuración de seguridad para cookies
-app.use(
-  cookieParser({
+app.use((req, res, next) => {
+  res.cookie("SameSite", "Strict", {
     sameSite: "strict",
     httpOnly: true,
-  })
-);
+  });
+  next();
+});
 
-// Configuración de CORS
+// CORS configuration
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -23,19 +27,19 @@ app.use(
   })
 );
 
-// Middleware de registro de solicitudes
+// Request logging middleware
 app.use(morgan("dev"));
 
-// Middleware para analizar el cuerpo de las solicitudes HTTP
+// Middleware for parsing HTTP request bodies
 app.use(express.json());
 
-// Middleware para manejar errores
-app.use((err, req, res, next) => {
+// Error handling middleware
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
-  res.status(500).send("Error interno del servidor");
+  res.status(500).send("Internal Server Error");
 });
 
-// Consumo de las rutas
+// Route consumption
 app.use("/api", authRoutes);
 app.use("/api", taskRoutes);
 

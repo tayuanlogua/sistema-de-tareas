@@ -1,40 +1,42 @@
-import mongoose, { Document, Schema } from 'mongoose';
+const mongoose = require("mongoose");
 
-// Definición del esquema de tarea
-const taskSchema = new mongoose.Schema({
+// Task schema definition
+const taskSchema = new mongoose.Schema(
+  {
     title: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     description: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     date: {
-        type: Date,
-        default: Date.now,
+      type: Date,
+      default: Date.now,
     },
     dueDate: {
-        type: Date,
-        required: true, // Hacer que el campo sea requerido
+      type: Date,
+      required: true, // Make the field required
     },
     status: {
-        type: String,
-        required: true,
-        enum: ['pending', 'in progress', 'completed'], // Valores posibles para el estado
-        default: 'pending', // Valor predeterminado
+      type: String,
+      required: true,
+      enum: ["pending", "in progress", "completed"], // Possible values for status
+      default: "pending", // Default value
     },
     user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User", // Referencia al modelo de usuario
-        required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // Reference to the user model
+      required: true,
     },
-}, {
-    timestamps: true, // Agrega campos de createdAt y updatedAt automáticamente
-});
+  },
+  {
+    timestamps: true, // Automatically add createdAt and updatedAt fields
+  }
+);
 
-// Compilación del modelo de tarea
+// Compile the task model
 const Task = mongoose.model("Task", taskSchema);
 
-export default Task;
-
+module.exports = Task;

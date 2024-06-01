@@ -1,36 +1,53 @@
+import { Request, Response } from "express";
 import User from "../models/user.model";
 import bcryptjs from "bcryptjs";
 import { createAccessToken } from "../libs/jwt";
 import jwt from "jsonwebtoken";
 import { TOKEN_SECRET } from "../config";
 
-// Registro de usuario
-export const register = async (req, res) => {
+/*
+ * Interface representing a user in the database.
+ */
+interface IUser {
+  _id: string;
+  username: string;
+  email: string;
+  password: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Registers a new user.
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ */
+export const register = async (req: Request, res: Response) => {
   const { username, email, password } = req.body;
 
   try {
-    // Validar si el usuario ya existe
-    const userFound = await User.findOne({ email });
+    // Check if user already exists
+    const userFound = (await User.findOne({ email })) as IUser;
     if (userFound) return res.status(400).json(["The email is already in use"]);
 
-    // Encriptar la contraseña
+    // Hash password
     const passwordHash = await bcryptjs.hash(password, 10);
 
-    // Crear nuevo usuario
+    // Create new user
     const newUser = new User({
       username,
       email,
       password: passwordHash,
     });
 
-    // Guardar el usuario en la base de datos
+    // Save user to the database
     const userSaved = await newUser.save();
 
-    // Crear token de acceso
+    // Create access token
     const token = await createAccessToken({ id: userSaved._id });
     res.cookie("token", token);
 
-    // Responder con la información del usuario para el frontend
+    // Respond with user information for the frontend
     res.json({
       id: userSaved._id,
       username: userSaved.username,
@@ -38,30 +55,34 @@ export const register = async (req, res) => {
       createdAt: userSaved.createdAt,
       updatedAt: userSaved.updatedAt,
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// Iniciar sesión de usuario
-export const login = async (req, res) => {
+/**
+ * Logs in a user.
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ */
+export const login = async (req: Request, res: Response) => {
   const { password, email } = req.body;
 
   try {
-    // Buscar si el usuario existe
-    const userFound = await User.findOne({ email });
+    // Find user in the database
+    const userFound = (await User.findOne({ email })) as IUser;
     if (!userFound) return res.status(400).json({ message: "User not found" });
 
-    // Comparar la contraseña
+    // Compare passwords
     const isMatch = await bcryptjs.compare(password, userFound.password);
     if (!isMatch)
       return res.status(400).json({ message: "Incorrect password" });
 
-    // Crear token de acceso
+    // Create access token
     const token = await createAccessToken({ id: userFound._id });
     res.cookie("token", token);
 
-    // Responder con la información del usuario para el frontend
+    // Respond with user information for the frontend
     res.json({
       id: userFound._id,
       username: userFound.username,
@@ -69,26 +90,34 @@ export const login = async (req, res) => {
       createdAt: userFound.createdAt,
       updatedAt: userFound.updatedAt,
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// Cerrar sesión de usuario
-export const logout = (req, res) => {
+/**
+ * Logs out a user.
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ */
+export const logout = (req: Request, res: Response) => {
   res.cookie("token", "", {
     expires: new Date(0),
   });
   return res.sendStatus(200);
 };
 
-// Perfil de usuario
-export const profile = async (req, res) => {
-  const userFound = await User.findById(req.user.id);
+/**
+ * Gets the profile of the authenticated user.
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ */
+export const profile = async (req: Request, res: Response) => {
+  const userFound = (await User.findById(req.user?.id)) as IUser;
   if (!userFound) return res.status(400).json({ message: "User not found" });
 
   return res.json({
-    id: userFound.id,
+    id: userFound._id,
     username: userFound.username,
     email: userFound.email,
     createdAt: userFound.createdAt,
@@ -96,15 +125,20 @@ export const profile = async (req, res) => {
   });
 };
 
-// Verificar token
-export const verifyToken = async (req, res) => {
+/**
+ * Verifies the access token.
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ */
+export const verifyToken = async (req: Request, res: Response) => {
   const { token } = req.cookies;
 
   if (!token) return res.status(401).json({ message: "Unauthorized" });
 
-  jwt.verify(token, TOKEN_SECRET, async (err, user) => {
-    if (err) return res.status(401).json({ message: "Unauthorized" });
-    const userFound = await User.findById(user.id);
+  jwt.verify(token, TOKEN_SECRET, async (err: any, user: any) => {
+    if (err)
+      return res.status(401).json({ message: "Unauthorized", error: err });
+    const userFound = (await User.findById(user?.id)) as IUser;
     if (!userFound) return res.status(401).json({ message: "Unauthorized" });
 
     return res.json({

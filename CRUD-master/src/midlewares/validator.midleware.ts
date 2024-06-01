@@ -1,11 +1,24 @@
-export const validateSchema = (schema) => (req, res, next) => {
-  try {
-    // Intenta analizar el cuerpo de la solicitud según el esquema proporcionado
-    schema.parse(req.body);
-    // Si la validación es exitosa, pasa al siguiente middleware
-    next();
-  } catch (error) {
-    // Si la validación falla, envía una respuesta de error con los mensajes de error
-    return res.status(400).json(error.errors.map((error) => error.message));
-  }
-};
+import { Request, Response, NextFunction } from "express";
+import * as yup from "yup"; // Importar yup
+import { Schema } from "yup";
+
+/**
+ * Middleware to validate the request body against a schema.
+ * @param {Schema<any>} schema - The Yup schema to validate the request body against.
+ * @returns {import("express").RequestHandler} Express middleware function.
+ */
+export const validateSchema =
+  (schema: Schema<any>) =>
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // Validate the request body according to the provided schema
+      schema.validateSync(req.body, { abortEarly: false });
+      // If validation is successful, proceed to the next middleware
+      next();
+    } catch (error: any) {
+      // If validation fails, send an error response with the error messages
+      return res
+        .status(400)
+        .json(error.errors.map((error: yup.ValidationError) => error.message));
+    }
+  };
