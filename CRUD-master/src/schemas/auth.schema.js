@@ -1,40 +1,39 @@
-// validar los datos que vienen desde el cliente (comprovamos los datos que llegan al backend frente a un esquema que previamente hemos creado desde aca y si coinciden el flujo de la app continua, sino coicide muestra el error)
-
-// zod nos permite crear un schema similar al de mongoose y comparamos 
-
-// z nos permite dar tipos de datos 
-import {z} from 'zod';
-
-export const registerSchema = z.object({
-    username: z.string({
-        required_error: 'Username is required'
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.loginSchema = exports.registerSchema = void 0;
+const zod_1 = require("zod");
+exports.registerSchema = zod_1.z.object({
+    username: zod_1.z.string({
+        required_error: "El nombre de usuario es obligatorio",
     }),
-    email: z.string({
-        required_error: 'Email is required'
-    }).email({
-        message: 'Invalid Email'
-    }),
-    password: z.string({
-        required_error: 'Password is required'
-    }). min(6, {
-        message: 'Password must be at least 6 characters'
+    email: zod_1.z
+        .string({
+        required_error: "El correo electrónico es obligatorio",
     })
-});
-
-export const loginSchema = z.object({
-    email:z.string({
-        required_error: 'Email is required'
-    }).email({
-        message: 'Invalid email'
+        .email({
+        message: "Correo electrónico inválido",
     }),
-    password: z.string({
-        required_error: 'Password is required'
-    }). min(6,{
-        message: 'Password must be at least 6 characters'
+    password: zod_1.z
+        .string({
+        required_error: "La contraseña es obligatoria",
     })
+        .min(6, {
+        message: "La contraseña debe tener al menos 6 caracteres",
+    }),
 });
-
-
-
-
-
+exports.loginSchema = zod_1.z.object({
+    email: zod_1.z
+        .string({
+        required_error: "El correo electrónico es obligatorio",
+    })
+        .email({
+        message: "Correo electrónico inválido",
+    }),
+    password: zod_1.z
+        .string({
+        required_error: "La contraseña es obligatoria",
+    })
+        .min(6, {
+        message: "La contraseña debe tener al menos 6 caracteres",
+    }),
+});

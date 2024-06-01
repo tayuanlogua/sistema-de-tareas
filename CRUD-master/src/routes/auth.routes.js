@@ -1,42 +1,68 @@
-// importaciones
-// 1,- desestructuramos e importamos la clase Router desde express
-import { Router } from "express";
-
-// desde los controladores importamos login, logout, register, profile, que basicamente son nuestras solicitudes http
-import {login, logout, register, profile, verifyToken} from '../controllers/auth.controller.js'
-
-// importamos desde nuestros middlewares, authRequired, que basicamente es la autenticacion desde valideToken
-import { authRequired } from "../midlewares/valideToken.js";
-
-//importamos el validateSchema para comparar nuestro esquema con los datos que nos estan llegando 
-import { validateSchema } from '../midlewares/validator.midleware.js'
-
-// importamos los esquemas para la validacion y comparacion
-import { registerSchema, loginSchema } from '../schemas/auth.schema.js'
-// import { verify } from "jsonwebtoken";
-
-// ejecutamos Router y lo almacenamos en una constante router, para poder acceder a sus metodos
-const router = Router();
-
-// router.post, con 'register', lo que hacemos aca basicamente es acceder al metodo post con el controlador register, para poder realizar la solicitud http
-router.post('/register', validateSchema(registerSchema),register);
-
-// router.post, con 'login', lo que hacemos aca basicamente es acceder al metodo post con el controlador login, para poder realizar la solicitud http
-router.post('/login', validateSchema(loginSchema),login);
-
-// router.post, con 'logout', lo que hacemos aca basicamente es acceder al metodo post con el controlador logout, para poder realizar la solicitud http
-router.post('/logout', logout)
-
-// verificamos el token
-router.get('/verify', verifyToken)
-
-// validar token (revisar si el usuario esta autenticado o no,(rutas protegidas))
-
-// realizamos la solicitud get, con el controlador profile para poder hacer la solicitud http
-
-// los parametros se ejecutan en orden en este caso se ejecuta el validador antes que el profile 
-router.get('/profile', authRequired, profile)
-
-
-
-export default router;           
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_controller_js_1 = require("../controllers/auth.controller.js");
+const valideToken_js_1 = require("../midlewares/valideToken.js");
+const validator_midleware_js_1 = require("../midlewares/validator.midleware.js");
+const auth_schema_js_1 = require("../schemas/auth.schema.js");
+const router = (0, express_1.Router)();
+// Endpoint para registrar un nuevo usuario
+router.post("/register", (0, validator_midleware_js_1.validateSchema)(auth_schema_js_1.registerSchema), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = yield (0, auth_controller_js_1.register)(req.body);
+        res.status(201).json(user);
+    }
+    catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+}));
+// Endpoint para iniciar sesión
+router.post("/login", (0, validator_midleware_js_1.validateSchema)(auth_schema_js_1.loginSchema), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const token = yield (0, auth_controller_js_1.login)(req.body);
+        res.json({ token });
+    }
+    catch (error) {
+        res.status(401).json({ error: error.message });
+    }
+}));
+// Endpoint para cerrar sesión
+router.post("/logout", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield (0, auth_controller_js_1.logout)(req);
+        res.sendStatus(204);
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}));
+// Endpoint para verificar el token de autenticación
+router.get("/verify", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield (0, auth_controller_js_1.verifyToken)(req);
+        res.json({ valid: result });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}));
+// Endpoint para obtener el perfil del usuario autenticado
+router.get("/profile", valideToken_js_1.authRequired, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userProfile = yield (0, auth_controller_js_1.profile)(req);
+        res.json(userProfile);
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}));
+exports.default = router;
