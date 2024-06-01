@@ -1,15 +1,21 @@
 "use strict";
+import express from "express";
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from "./swagger.json"; // Path to the OpenAPI documentation file
 import app from "./app";
 import { connectDB } from "./db";
 
-// Server port
 const PORT = process.env.PORT || 3000;
+const server = express();
 
-// Starting the server and connecting to the database
+// Middleware to serve Swagger documentation
+server.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+// Start the server and connect to the database
 const startServer = async () => {
   try {
     // Starting the Express application
-    const server = app.listen(PORT, () => {
+    const serverInstance = app.listen(PORT, () => {
       console.log(`Server running at http://localhost:${PORT}`);
     });
 
@@ -18,7 +24,7 @@ const startServer = async () => {
 
     // Server close handling
     process.on("SIGINT", () => {
-      server.close(() => {
+      serverInstance.close(() => {
         console.log("Server closed successfully");
         process.exit(0);
       });

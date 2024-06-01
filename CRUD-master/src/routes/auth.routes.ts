@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import {
   login,
   logout,
@@ -6,22 +6,12 @@ import {
   profile,
   verifyToken,
 } from "../controllers/auth.controller";
-import { authRequired } from "../midlewares/valideToken";
-import { validateSchema } from "../midlewares/validator.midleware";
+import { authRequired } from "../middlewares/validateToken";
+import { validateSchema } from "../middlewares/validator.middleware";
 import { registerSchema, loginSchema } from "../schemas/auth.schema";
 
-/**
- * Router to handle authentication related endpoints.
- * @type {Router}
- */
 const router = Router();
 
-/**
- * Endpoint to register a new user.
- * @name POST /register
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- */
 router.post(
   "/register",
   validateSchema(registerSchema),
@@ -35,12 +25,6 @@ router.post(
   }
 );
 
-/**
- * Endpoint to login a user.
- * @name POST /login
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- */
 router.post(
   "/login",
   validateSchema(loginSchema),
@@ -54,45 +38,27 @@ router.post(
   }
 );
 
-/**
- * Endpoint to logout a user.
- * @name POST /logout
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- */
 router.post("/logout", async (req: Request, res: Response) => {
   try {
-    await logout(req);
+    await logout(req, res);
     res.sendStatus(204);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-/**
- * Endpoint to verify authentication token.
- * @name GET /verify
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- */
 router.get("/verify", async (req: Request, res: Response) => {
   try {
-    const result = await verifyToken(req);
+    const result = await verifyToken(req, res);
     res.json({ valid: result });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-/**
- * Endpoint to get the profile of authenticated user.
- * @name GET /profile
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- */
 router.get("/profile", authRequired, async (req: Request, res: Response) => {
   try {
-    const userProfile = await profile(req);
+    const userProfile = await profile(req, res);
     res.json(userProfile);
   } catch (error) {
     res.status(500).json({ error: error.message });

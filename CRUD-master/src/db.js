@@ -1,33 +1,16 @@
-"use strict";
-import mongoose from "mongoose";
+const express = require("express");
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./swagger.json"); // Ruta al archivo de documentación OpenAPI
 
-/**
- * Function to connect to the MongoDB database.
- * @async
- * @function connectDB
- * @returns {Promise<void>} A Promise that resolves when the connection is established.
- * @throws {Error} If there is an error connecting to the database.
- */
-const connectDB = async () => {
-  try {
-    // Connection URL from an environment variable
-    const dbURI = process.env.MONGODB_URI;
+const app = express();
 
-    // Connection configuration options
-    const options = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      // Add other options as needed
-    };
+// Middleware para servir la documentación Swagger
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-    // Connect to the database
-    await mongoose.connect(dbURI, options);
-    console.log("Connected to the MongoDB database");
-  } catch (error) {
-    // Error handling
-    console.error("Error connecting to the database:", error);
-    throw error; // Throw the error to be handled by the application
-  }
-};
+// Puerto en el que se ejecutará el servidor
+const PORT = process.env.PORT || 3000;
 
-export { connectDB };
+// Iniciar el servidor
+app.listen(PORT, () => {
+  console.log(`Servidor en ejecución en http://localhost:${PORT}`);
+});

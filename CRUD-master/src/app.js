@@ -3,6 +3,8 @@ import express from "express";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from "./swagger.json"; // Path to the OpenAPI documentation file
 import authRoutes from "./routes/auth.routes.js";
 import tasksRoutes from "./routes/tasks.routes.js";
 
@@ -26,6 +28,9 @@ app.use(
 
 // Request logging middleware
 app.use(morgan("dev"));
+
+// Middleware for serving Swagger documentation
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Middleware for parsing HTTP request bodies
 app.use(express.json());

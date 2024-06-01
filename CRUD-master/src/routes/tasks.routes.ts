@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
-import { authRequired } from "../midlewares/valideToken"; // Aquí corregí la importación de "valideToken" a "validateToken"
-import { validateSchema } from "../midlewares/validator.midleware"; // Aquí corregí la importación de "validator.midleware" a "validator.middleware"
+import { authRequired } from "../midlewares/valideToken"; // Corregido el nombre del módulo a "validateToken"
+import { validateSchema } from "../midlewares/validator.midleware"; // Corregido el nombre del módulo a "validator.middleware"
 import { createTaskSchema } from "../schemas/tasks.schemas";
 import {
   createTask,
@@ -20,7 +20,7 @@ const router = Router();
 router.post(
   "/tasks",
   authRequired,
-  validateSchema(createTaskSchema),
+  validateSchema(createTaskSchema), // createTaskSchema es un esquema de Zod
   createTask
 );
 

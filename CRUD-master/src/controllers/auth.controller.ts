@@ -5,8 +5,8 @@ import { createAccessToken } from "../libs/jwt";
 import jwt from "jsonwebtoken";
 import { TOKEN_SECRET } from "../config";
 
-/*
- * Interface representing a user in the database.
+/**
+ * Interface for defining the structure of a user.
  */
 interface IUser {
   _id: string;
@@ -18,119 +18,132 @@ interface IUser {
 }
 
 /**
- * Registers a new user.
- * @param {Request} req - The request object.
- * @param {Response} res - The response object.
+ * Controller function to handle user registration.
+ * @param {Request} req - The Express request object.
+ * @param {Response} res - The Express response object.
+ * @returns {Response} The response containing user data or error message.
  */
-export const register = async (req: Request, res: Response) => {
+export const register = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { username, email, password } = req.body;
 
   try {
-    // Check if user already exists
-    const userFound = (await User.findOne({ email })) as IUser;
+    const userFound = await User.findOne({ email });
     if (userFound) return res.status(400).json(["The email is already in use"]);
 
-    // Hash password
     const passwordHash = await bcryptjs.hash(password, 10);
 
-    // Create new user
     const newUser = new User({
       username,
       email,
       password: passwordHash,
     });
 
-    // Save user to the database
     const userSaved = await newUser.save();
 
-    // Create access token
     const token = await createAccessToken({ id: userSaved._id });
     res.cookie("token", token);
 
-    // Respond with user information for the frontend
-    res.json({
+    return res.json({
       id: userSaved._id,
       username: userSaved.username,
       email: userSaved.email,
       createdAt: userSaved.createdAt,
       updatedAt: userSaved.updatedAt,
     });
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
   }
 };
 
 /**
- * Logs in a user.
- * @param {Request} req - The request object.
- * @param {Response} res - The response object.
+ * Controller function to handle user login.
+ * @param {Request} req - The Express request object.
+ * @param {Response} res - The Express response object.
+ * @returns {Response} The response containing user data or error message.
  */
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response): Promise<Response> => {
   const { password, email } = req.body;
 
   try {
-    // Find user in the database
-    const userFound = (await User.findOne({ email })) as IUser;
+    const userFound = await User.findOne({ email });
     if (!userFound) return res.status(400).json({ message: "User not found" });
 
-    // Compare passwords
     const isMatch = await bcryptjs.compare(password, userFound.password);
     if (!isMatch)
       return res.status(400).json({ message: "Incorrect password" });
 
-    // Create access token
     const token = await createAccessToken({ id: userFound._id });
     res.cookie("token", token);
 
-    // Respond with user information for the frontend
-    res.json({
+    return res.json({
       id: userFound._id,
       username: userFound.username,
       email: userFound.email,
       createdAt: userFound.createdAt,
       updatedAt: userFound.updatedAt,
     });
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
   }
 };
 
 /**
- * Logs out a user.
- * @param {Request} req - The request object.
- * @param {Response} res - The response object.
+ * Controller function to handle user logout.
+ * @param {Request} req - The Express request object.
+ * @param {Response} res - The Express response object.
+ * @returns {Response} The response indicating successful logout or error message.
  */
-export const logout = (req: Request, res: Response) => {
-  res.cookie("token", "", {
-    expires: new Date(0),
-  });
-  return res.sendStatus(200);
+export const logout = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    res.clearCookie("token");
+    return res.sendStatus(204);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
 };
 
 /**
- * Gets the profile of the authenticated user.
- * @param {Request} req - The request object.
- * @param {Response} res - The response object.
+ * Controller function to fetch user profile.
+ * @param {Request} req - The Express request object.
+ * @param {Response} res - The Express response object.
+ * @returns {Response} The response containing user profile data or error message.
  */
-export const profile = async (req: Request, res: Response) => {
-  const userFound = (await User.findById(req.user?.id)) as IUser;
-  if (!userFound) return res.status(400).json({ message: "User not found" });
+export const profile = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userFound = await User.findById(req.user?.id);
+    if (!userFound) return res.status(400).json({ message: "User not found" });
 
-  return res.json({
-    id: userFound._id,
-    username: userFound.username,
-    email: userFound.email,
-    createdAt: userFound.createdAt,
-    updatedAt: userFound.updatedAt,
-  });
+    return res.json({
+      id: userFound._id,
+      username: userFound.username,
+      email: userFound.email,
+      createdAt: userFound.createdAt,
+      updatedAt: userFound.updatedAt,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
 };
 
 /**
- * Verifies the access token.
- * @param {Request} req - The request object.
- * @param {Response} res - The response object.
+ * Controller function to verify user token.
+ * @param {Request} req - The Express request object.
+ * @param {Response} res - The Express response object.
+ * @returns {Response} The response indicating successful token verification or error message.
  */
-export const verifyToken = async (req: Request, res: Response) => {
+export const verifyToken = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { token } = req.cookies;
 
   if (!token) return res.status(401).json({ message: "Unauthorized" });
@@ -138,8 +151,9 @@ export const verifyToken = async (req: Request, res: Response) => {
   jwt.verify(token, TOKEN_SECRET, async (err: any, user: any) => {
     if (err)
       return res.status(401).json({ message: "Unauthorized", error: err });
-    const userFound = (await User.findById(user?.id)) as IUser;
-    if (!userFound) return res.status(401).json({ message: "Unauthorized" });
+    const userFound = await User.findById(user?.id);
+    if (!userFound) return;
+    return res.status(401).json({ message: "Unauthorized" });
 
     return res.json({
       id: userFound._id,
