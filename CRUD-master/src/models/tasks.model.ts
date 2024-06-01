@@ -15,6 +15,16 @@ const taskSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    dueDate: {
+      type: Date,
+      required: true, // Hacer que el campo sea requerido
+    },
+    status: {
+      type: String,
+      required: true,
+      enum: ["pending", "in progress", "completed"], // Valores posibles para el estado
+      default: "pending", // Valor predeterminado
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User", // Referencia al modelo de usuario
