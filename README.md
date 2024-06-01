@@ -1,4 +1,3 @@
-````markdown
 # CRUD Project with TypeScript 🛠️
 
 This is a basic project implementing CRUD (Create, Read, Update, Delete) operations using TypeScript for the backend.
@@ -12,7 +11,6 @@ Make sure you have TypeScript installed globally on your system:
 ```bash
 npm install -g typescript
 ```
-````
 
 ### Creating `tsconfig.json`
 
@@ -113,8 +111,3 @@ This will start the server using Ts-node, which compiles and executes the TypeSc
 Feel free to contribute to the project. You can open a new pull request to suggest improvements, fix bugs, or add new features.
 
 Thank you for your interest in this project! 🙏
-
-```
-
-This README provides detailed information about the initial setup, project structure, how to compile and run the project, as well as how to contribute to it. Additionally, it adds details about additional dependencies and how to use tools like Nodemon and Ts-node to facilitate development.
-```
